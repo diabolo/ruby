@@ -696,11 +696,16 @@ module Net   #:nodoc:
 
     def do_finish
       @started = false
-      @socket.close if @socket and not @socket.closed?
+      close_socket
       @socket = nil
     end
     private :do_finish
 
+    def close_socket
+      @socket.close if @socket and not @socket.closed?
+    end
+    private :close_socket
+    
     #
     # proxy
     #
@@ -1201,7 +1206,7 @@ module Net   #:nodoc:
       res
     rescue => exception
       D "Conn close because of error #{exception}"
-      @socket.close unless @socket.closed?
+      close_socket
       raise exception
     end
 
@@ -1219,12 +1224,12 @@ module Net   #:nodoc:
         D 'Conn socket closed'
       elsif not res.body and @close_on_empty_response
         D 'Conn close'
-        @socket.close
+        close_socket
       elsif keep_alive?(req, res)
         D 'Conn keep-alive'
       else
         D 'Conn close'
-        @socket.close
+        close_socket
       end
     end
 
